@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "phyprobe"
+version = "0.1.0"
+description = "PhyProbe: Physical Consistency Violation Scorer for generated videos"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["video", "quality", "physical-plausibility", "AI-generated-video"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.24",
+    "decord>=0.6",
+    "opencv-python>=4.7",
+    "huggingface_hub>=0.20",
+    "gdown>=6.1.0",
+]
+
+[project.optional-dependencies]
+# Install perception_models manually — it is not on PyPI:
+#   pip install git+https://github.com/facebookresearch/perception_models.git
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+phyprobe-score = "phyprobe._cli:main"
+
+[project.urls]
+Homepage = "https://research.nvidia.com/labs/cosmos-lab/phyprobe/"
+Paper    = "https://arxiv.org/abs/2609.38377"
+Repository = "https://github.com/vinesmsuic/PhyProbe"
+Issues   = "https://github.com/vinesmsuic/PhyProbe/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["phyprobe"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
