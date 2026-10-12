@@ -3,8 +3,8 @@
 ### [[Project Page]](https://research.nvidia.com/labs/cosmos-lab/phyprobe/) [[Paper]](https://arxiv.org/abs/2609.38377) [[Video]](https://youtu.be/EjP1-Sd9nlw) [[Model]](https://huggingface.co/vinesmsuic/PhyProbe)
 
 **PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos**  
-[Max Ku](https://kuwingfung.github.io/), Jiaojiao Fan, Zekun Hao, Francesco Ferroni, Heng Wang, [Wenhu Chen](https://wenhuchen.github.io/), [Ming-Yu Liu](https://mingyuliu.net/), [Prithvijit Chattopadhyay](https://prithv1.xyz/)  
-In NeurIPS 2026.
+[Max Ku](https://kuwingfung.github.io/), [Jiaojiao Fan](https://sbyebss.github.io/), [Zekun Hao](https://zekunhao.com/), [Francesco Ferroni](https://www.francescoferroni.com/), [Heng Wang](https://hengcv.github.io/), [Wenhu Chen](https://wenhuchen.github.io/), [Ming-Yu Liu](https://mingyuliu.net/), [Prithvijit Chattopadhyay](https://prithv1.xyz/)  
+In [NeurIPS 2026](https://neurips.cc/Conferences/2026).
 
 <a href="https://youtu.be/EjP1-Sd9nlw"><img src="https://raw.githubusercontent.com/vinesmsuic/PhyProbe/main/assets/phyprobe_demo.gif" alt="PhyProbe demo" width="100%"></a>
 
@@ -18,6 +18,8 @@ Higher score → more severe physical consistency violations.
 ---
 
 ## Installation
+
+Requires Python ≥ 3.10.
 
 ```bash
 pip install phyprobe
@@ -38,7 +40,7 @@ pip install git+https://github.com/facebookresearch/perception_models.git
 | `pecore_paper` (default) | PE-Core-G14-448 | Reproduces paper results |
 
 The trained head weights (~4 MB) ship with the package. The frozen PE-Core
-backbone is downloaded by `perception_models` on first use. The weights are
+backbone (~9 GB) is downloaded by `perception_models` on first use. The weights are
 also on the [Hugging Face Hub](https://huggingface.co/vinesmsuic/PhyProbe);
 pass `download=True` (CLI: `--download`) to fetch them from there instead.
 
@@ -167,5 +169,15 @@ If you use PhyProbe in your research, please cite:
   eprint  = {2609.38377},
   archivePrefix = {arXiv},
   url     = {https://arxiv.org/abs/2609.38377}
+}
+
+@misc{ku2026phyproberethinkingphysicalconsistency,
+      title={PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos}, 
+      author={Max Ku and Jiaojiao Fan and Zekun Hao and Francesco Ferroni and Heng Wang and Wenhu Chen and Ming-Yu Liu and Prithvijit Chattopadhyay},
+      year={2026},
+      eprint={2609.38377},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2609.38377}, 
 }
 ```
