@@ -6,7 +6,7 @@
 [Max Ku](https://kuwingfung.github.io/), [Jiaojiao Fan](https://sbyebss.github.io/), [Zekun Hao](https://zekunhao.com/), [Francesco Ferroni](https://www.francescoferroni.com/), [Heng Wang](https://hengcv.github.io/), [Wenhu Chen](https://wenhuchen.github.io/), [Ming-Yu Liu](https://mingyuliu.net/), [Prithvijit Chattopadhyay](https://prithv1.xyz/)  
 In [NeurIPS 2026](https://neurips.cc/Conferences/2026).
 
-<a href="https://youtu.be/EjP1-Sd9nlw"><img src="https://raw.githubusercontent.com/vinesmsuic/PhyProbe/main/assets/phyprobe_demo.gif" alt="PhyProbe demo" width="100%"></a>
+<a href="https://youtu.be/EjP1-Sd9nlw"><img src="https://github.com/vinesmsuic/PhyProbe/blob/main/assets/phyprobe_demo.gif?raw=true" alt="PhyProbe demo" width="100%"></a>
 
 PhyProbe scores how severely a generated video violates physical consistency.
 It extracts features with a frozen spatiotemporal encoder (PE-Core-G14-448) and
