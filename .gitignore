@@ -1,10 +1,10 @@
 # Project
-*.mp4
 _backup/
 
 # Checkpoints and model weights
 checkpoints/
 *.pt
+!phyprobe/weights/*.pt
 *.pth
 *.ckpt
 *.safetensors
@@ -43,3 +43,7 @@ flagged/
 .DS_Store
 .vscode/
 .idea/
+
+# Secrets
+.env
+.env.*

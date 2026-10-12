@@ -7,8 +7,29 @@ from typing import Optional, Union
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 DEFAULT_FPS = 16.0
+# Gray fill for letterbox bars, as in training (pad_value=0.5).
+_PAD_VALUE = 128
+
+
+def _letterbox(frames: np.ndarray, height: int, width: int) -> torch.Tensor:
+    """Resize (T, H, W, 3) uint8 frames to fit (height, width), keeping aspect
+    ratio and padding with gray.  Matches the training data loader exactly."""
+    t, h, w, c = frames.shape
+    scale = min(width / max(w, 1), height / max(h, 1))
+    new_w = max(1, int(round(w * scale)))
+    new_h = max(1, int(round(h * scale)))
+    x = torch.from_numpy(frames).permute(0, 3, 1, 2).float()
+    if (new_h, new_w) != (h, w):
+        x = F.interpolate(x, size=(new_h, new_w), mode="bilinear", align_corners=False)
+    x = x.clamp(0, 255).byte()
+    canvas = torch.full((t, c, height, width), _PAD_VALUE, dtype=torch.uint8)
+    top = (height - new_h) // 2
+    left = (width - new_w) // 2
+    canvas[:, :, top:top + new_h, left:left + new_w] = x
+    return canvas  # (T, 3, H, W) uint8
 
 
 def load_video(
@@ -23,7 +44,8 @@ def load_video(
     Load a video and return a float32 tensor [1, C, T, H, W] in [0, 1].
 
     The video is resampled to ``fps`` first.  ``num_frames`` frames are then
-    uniformly sampled from the resampled sequence.
+    uniformly sampled from the resampled sequence.  Frames are letterboxed to
+    ``height`` x ``width`` (aspect ratio kept, gray bars), as in training.
 
     Args:
         path:       Path to the video file.
@@ -45,11 +67,6 @@ def load_video(
             "decord is required: pip install decord\n"
             "On some systems: conda install -c conda-forge decord"
         )
-    try:
-        import cv2
-    except ImportError:
-        raise ImportError("opencv-python is required: pip install opencv-python")
-
     reader = VideoReader(str(path), ctx=cpu(0))
     total = len(reader)
     if total == 0:
@@ -83,12 +100,6 @@ def load_video(
     frames = reader.get_batch(sample_indices).asnumpy()  # (T, H_orig, W_orig, 3) uint8
     del reader
 
-    if frames.shape[1] != height or frames.shape[2] != width:
-        frames = np.stack([
-            cv2.resize(f, (width, height), interpolation=cv2.INTER_LINEAR)
-            for f in frames
-        ])
-
     # (T, H, W, 3) uint8  →  (1, 3, T, H, W) float32 [0, 1]
-    tensor = torch.from_numpy(frames).permute(3, 0, 1, 2).float() / 255.0
+    tensor = _letterbox(frames, height, width).permute(1, 0, 2, 3).float() / 255.0
     return tensor.unsqueeze(0)

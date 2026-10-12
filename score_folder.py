@@ -5,7 +5,6 @@ Score all videos in a folder and print a ranked list.
 Usage:
     python score_folder.py /path/to/videos/
     python score_folder.py --clip-sec 3.0 /path/to/videos/
-    python score_folder.py --variant pespatial_paper /path/to/videos/
 """
 
 import argparse

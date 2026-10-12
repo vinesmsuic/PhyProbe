@@ -7,7 +7,8 @@ name = "phyprobe"
 version = "0.1.0"
 description = "PhyProbe: Physical Consistency Violation Scorer for generated videos"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 keywords = ["video", "quality", "physical-plausibility", "AI-generated-video"]
 classifiers = [
@@ -15,7 +16,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -23,7 +23,6 @@ dependencies = [
     "torch>=2.0",
     "numpy>=1.24",
     "decord>=0.6",
-    "opencv-python>=4.7",
     "huggingface_hub>=0.20",
     "gdown>=6.1.0",
 ]
@@ -44,6 +43,12 @@ Issues   = "https://github.com/vinesmsuic/PhyProbe/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["phyprobe"]
+# twine and PyPI tooling do not yet accept the 2.5 that recent hatchling emits.
+core-metadata-version = "2.4"
+
+[tool.hatch.build.targets.sdist]
+core-metadata-version = "2.4"
+exclude = ["uv.lock", "build_pypi.sh", ".env", ".env.*", "assets/"]
 
 [tool.ruff]
 line-length = 100

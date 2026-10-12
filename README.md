@@ -27,7 +27,11 @@ pip install git+https://github.com/facebookresearch/perception_models.git
 | Variant | Backbone | Notes |
 |---|---|---|
 | `pecore_paper` (default) | PE-Core-G14-448 | Reproduces paper results |
-| `pespatial_paper` | PE-Spatial-G14-448 | Reproduces paper results |
+
+The trained head weights (~4 MB) ship with the package. The frozen PE-Core
+backbone is downloaded by `perception_models` on first use. The weights are
+also on the [Hugging Face Hub](https://huggingface.co/vinesmsuic/PhyProbe);
+pass `download=True` (CLI: `--download`) to fetch them from there instead.
 
 ---
 
@@ -38,7 +42,6 @@ import phyprobe
 
 # Load a pretrained variant
 model = phyprobe.PhyProbe()                     # pecore_paper (default)
-model = phyprobe.PhyProbe("pespatial_paper")
 
 # Score a video  →  float in [0, 1]
 # Videos are always resampled to 16 fps; frames are uniformly sampled
@@ -76,9 +79,6 @@ phyprobe-score video.mp4
 
 # Restrict to first 3 seconds
 phyprobe-score --clip-sec 3.0 video.mp4
-
-# Use a specific variant
-phyprobe-score --variant pespatial_paper video.mp4
 
 # Score all videos in a folder
 phyprobe-score --folder /path/to/videos/
@@ -142,3 +142,21 @@ The notebook installs the only external dependency (`perception_models`), downlo
    `(config_dict, device)` and returns `[B, 1]` from `forward(video)`.
 2. Register a builder in `phyprobe/_model.py` under `_BACKBONE_REGISTRY`.
 3. Add variant entries in `phyprobe/_hub.py` under `VARIANTS`.
+
+---
+
+## Citation
+
+If you use PhyProbe in your research, please cite:
+
+```bibtex
+@misc{ku2026phyproberethinkingphysicalconsistency,
+      title={PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos}, 
+      author={Max Ku and Jiaojiao Fan and Zekun Hao and Francesco Ferroni and Heng Wang and Wenhu Chen and Ming-Yu Liu and Prithvijit Chattopadhyay},
+      year={2026},
+      eprint={2609.38377},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2609.38377}, 
+}
+```

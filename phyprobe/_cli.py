@@ -6,7 +6,6 @@ the full duration by default.
 
 Usage:
     phyprobe-score video.mp4
-    phyprobe-score --variant pespatial_paper video.mp4
     phyprobe-score --checkpoint model.pt video.mp4
     phyprobe-score --clip-sec 3.0 video.mp4   # first 3 s only
     phyprobe-score --folder /path/to/videos/
@@ -40,9 +39,11 @@ def main():
     parser.add_argument("--folder", default=None,
                         help="Score all videos found recursively under this folder.")
     parser.add_argument("--variant", default="pecore_paper",
-                        help="Pretrained variant: pecore_paper (default) or pespatial_paper.")
+                        help="Pretrained variant (default: pecore_paper).")
     parser.add_argument("--checkpoint", default=None,
                         help="Path to a local .pt checkpoint file.")
+    parser.add_argument("--download", action="store_true",
+                        help="Fetch weights from the Hugging Face Hub instead of the bundled copy.")
     parser.add_argument("--device", default=None,
                         help="Compute device (default: cuda if available, else cpu).")
     parser.add_argument("--raw", action="store_true",
@@ -68,6 +69,7 @@ def main():
         variant=args.variant,
         checkpoint=args.checkpoint,
         device=args.device,
+        download=args.download,
     )
     if args.video:
         if args.raw:

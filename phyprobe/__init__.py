@@ -6,8 +6,7 @@ Quick start::
     import phyprobe
 
     # Load a pretrained variant
-    model = phyprobe.PhyProbe("pecore_paper")       # PE-Core (default)
-    model = phyprobe.PhyProbe("pespatial_paper")    # PE-Spatial
+    model = phyprobe.PhyProbe()                     # pecore_paper (default)
 
     score = model.score("my_video.mp4")             # float in [0, 1]
     # 0 = no violation, 1 = strong physical consistency violation
@@ -53,9 +52,12 @@ class PhyProbe:
         Path to a local ``.pt`` checkpoint file.
     device : str or torch.device, optional
         Compute device.  Defaults to CUDA if available, otherwise CPU.
+    download : bool, optional
+        Fetch the weights from the Hugging Face Hub (falling back to Google
+        Drive) instead of using the copy bundled with the package.
     compile_model : bool, optional
-        Apply ``torch.compile`` for faster GPU throughput (PyTorch ≥ 2.0).
-        Defaults to ``True`` on GPU.
+        Apply ``torch.compile`` (PyTorch ≥ 2.0).  Defaults to ``False``; the
+        first forward pass is slow while compiling.
     """
 
     def __init__(
@@ -63,7 +65,8 @@ class PhyProbe:
         variant: str = DEFAULT_VARIANT,
         checkpoint: Optional[Union[str, Path]] = None,
         device: Optional[Union[str, torch.device]] = None,
-        compile_model: Optional[bool] = None,
+        compile_model: bool = False,
+        download: bool = False,
     ):
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -73,21 +76,30 @@ class PhyProbe:
             variant=variant,
             checkpoint_path=str(checkpoint) if checkpoint is not None else None,
             device=str(self.device),
+            download=download,
         )
 
         self._frames: int = config_dict.get("cur_frames", 48)
         self._height: int = config_dict.get("cur_height", 480)
         self._width: int = config_dict.get("cur_width", 480)
-        self._fps: float = float(config_dict.get("cur_fps", 16.0))
+        self._fps: float = float(
+            config_dict.get("cur_target_fps", config_dict.get("cur_fps", 16.0))
+        )
 
         self._model = build_model(config_dict, device=str(self.device))
-        self._model.load_state_dict(state_dict, strict=True)
+        # Head-only checkpoints omit the frozen backbone, which build_model
+        # already loaded from the pretrained weights.
+        missing, unexpected = self._model.load_state_dict(state_dict, strict=False)
+        missing = [k for k in missing if not k.startswith("pe_model.")]
+        if missing or unexpected:
+            raise RuntimeError(
+                f"Checkpoint does not match the model. Missing keys: {missing}. "
+                f"Unexpected keys: {unexpected}."
+            )
         self._model.eval().to(self.device)
 
-        if compile_model is None:
-            compile_model = self.device.type == "cuda" and hasattr(torch, "compile")
         if compile_model:
-            self._model = torch.compile(self._model, mode="reduce-overhead")
+            self._model = torch.compile(self._model)
 
     # ------------------------------------------------------------------
     @torch.inference_mode()

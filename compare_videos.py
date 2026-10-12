@@ -5,7 +5,6 @@ Compare two videos side-by-side.  The higher-scoring video has more violations.
 Usage:
     python compare_videos.py video_a.mp4 video_b.mp4
     python compare_videos.py --clip-sec 3.0 video_a.mp4 video_b.mp4
-    python compare_videos.py --variant pespatial_paper video_a.mp4 video_b.mp4
 """
 
 import argparse

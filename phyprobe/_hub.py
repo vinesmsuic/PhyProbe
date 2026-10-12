@@ -1,28 +1,40 @@
-"""Checkpoint download and loading utilities."""
+"""Checkpoint loading and download utilities."""
 
 from __future__ import annotations
 
+import os
 import pickle
 from pathlib import Path
 from typing import Optional
 
 import torch
 
-# Local checkpoints directory (phyprobe/checkpoints/ next to the package root).
-_CHECKPOINTS_DIR = Path(__file__).parent.parent / "checkpoints"
+# Pretrained weights ship inside the package, as in LPIPS.  They hold only the
+# quality head; the frozen PE backbone comes from the perception_models
+# pretrained download.
+_WEIGHTS_DIR = Path(__file__).parent / "weights"
+
+# Checkpoints found here are used as-is (a source checkout's checkpoints/ folder).
+_REPO_CHECKPOINTS_DIR = Path(__file__).parent.parent / "checkpoints"
+
+# Google Drive downloads are cached here. Override with $PHYPROBE_CACHE.
+_CACHE_DIR = Path(
+    os.environ.get("PHYPROBE_CACHE")
+    or Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "phyprobe"
+)
 
 # Pretrained variant registry.
 # Each entry maps a variant name → model config.
-# "backbone" must match a key in _model._BACKBONE_REGISTRY.
+# "model_backbone" must match a key in _model._BACKBONE_REGISTRY.
 #
-# Download sources are tried in order: local file → Hugging Face Hub → Google Drive.
+# Sources are tried in order: bundled weights → local file → Hugging Face Hub
+# → Google Drive.
 VARIANTS: dict[str, dict] = {
     "pecore_paper": {
-        # TODO: set to the Hugging Face model repo once the weights are uploaded,
-        # e.g. "vinesmsuic/PhyProbe". While None, the Hub is skipped.
-        "hf_repo_id": None,
+        "weights_file": "pecore_paper.pt",
+        "hf_repo_id": "vinesmsuic/PhyProbe",
         "hf_filename": "pecore_paper.pt",
-        "hf_revision": None,  # pin a commit hash for reproducible downloads
+        "hf_revision": "b71eb8b91724e2954858730ae0ea39eed54cf426",
         "gdrive_file_id": "1SdGpDY3TDeML5KRUviEgJ2z7yEw-5Vw2",
         "local_filename": "pecore_paper.pt",
         "model_backbone": "pecore_proj",
@@ -37,8 +49,11 @@ VARIANTS: dict[str, dict] = {
 
 DEFAULT_VARIANT = "pecore_paper"
 
-# Download/source keys that are not part of the model config.
-_META_KEYS = {"hf_repo_id", "hf_filename", "hf_revision", "gdrive_file_id", "local_filename"}
+# Source keys that are not part of the model config.
+_META_KEYS = {
+    "weights_file", "hf_repo_id", "hf_filename", "hf_revision", "gdrive_file_id",
+    "local_filename",
+}
 
 
 def _hf_download(repo_id: str, filename: str, revision: Optional[str] = None) -> Path:
@@ -48,7 +63,7 @@ def _hf_download(repo_id: str, filename: str, revision: Optional[str] = None) ->
         raise ImportError(
             "huggingface_hub is required to download checkpoints: pip install huggingface_hub"
         )
-    print(f"Downloading checkpoint from Hugging Face Hub: {repo_id}/{filename}")
+    print(f"Fetching checkpoint from Hugging Face Hub: {repo_id}/{filename}")
     return Path(hf_hub_download(repo_id=repo_id, filename=filename, revision=revision))
 
 
@@ -56,31 +71,47 @@ def _gdrive_download(file_id: str, dest: Path) -> Path:
     try:
         import gdown
     except ImportError:
-        raise ImportError("gdown is required to download checkpoints: uv add gdown")
+        raise ImportError("gdown is required to download checkpoints: pip install gdown")
     dest.parent.mkdir(parents=True, exist_ok=True)
     print(f"Downloading checkpoint from Google Drive → {dest}")
     gdown.download(id=file_id, output=str(dest), quiet=False)
     return dest
 
 
-def _get_local_checkpoint(variant_cfg: dict) -> Optional[Path]:
-    """Return path to the variant's checkpoint, downloading it if needed."""
+def _get_local_checkpoint(variant_cfg: dict, download: bool = False) -> Optional[Path]:
+    """Return path to the variant's checkpoint.
+
+    Uses the bundled weights unless ``download`` is True, then falls back to a
+    local file, the Hugging Face Hub and Google Drive.
+    """
+    weights_file = variant_cfg.get("weights_file")
+    if not download and weights_file and (_WEIGHTS_DIR / weights_file).exists():
+        return _WEIGHTS_DIR / weights_file
+
     local_filename = variant_cfg.get("local_filename")
-    if local_filename is not None:
-        local_path = _CHECKPOINTS_DIR / local_filename
-        if local_path.exists():
-            return local_path
-    else:
-        local_path = None
+    if not download and local_filename is not None:
+        for d in (_REPO_CHECKPOINTS_DIR, _CACHE_DIR):
+            if (d / local_filename).exists():
+                return d / local_filename
+
+    gdrive_file_id = variant_cfg.get("gdrive_file_id")
+    has_gdrive = bool(gdrive_file_id and local_filename)
 
     hf_repo_id = variant_cfg.get("hf_repo_id")
     hf_filename = variant_cfg.get("hf_filename")
     if hf_repo_id and hf_filename:
-        return _hf_download(hf_repo_id, hf_filename, variant_cfg.get("hf_revision"))
+        try:
+            return _hf_download(hf_repo_id, hf_filename, variant_cfg.get("hf_revision"))
+        except ImportError:
+            raise
+        except Exception as e:
+            if not has_gdrive:
+                raise
+            print(f"Hugging Face Hub download failed ({e}); falling back to Google Drive.")
 
-    gdrive_file_id = variant_cfg.get("gdrive_file_id")
-    if gdrive_file_id and local_path is not None:
-        return _gdrive_download(gdrive_file_id, local_path)
+    if has_gdrive:
+        dest = _CACHE_DIR / local_filename
+        return dest if dest.exists() else _gdrive_download(gdrive_file_id, dest)
     return None
 
 
@@ -104,13 +135,15 @@ def load_checkpoint(
     variant: str = DEFAULT_VARIANT,
     checkpoint_path: Optional[str] = None,
     device: str = "cpu",
+    download: bool = False,
 ) -> tuple[dict, dict]:
     """
     Load a PhyProbe checkpoint and return (config_dict, state_dict).
 
     Supply ``checkpoint_path`` to load a local .pt file directly, or leave
-    it as None to use the variant's checkpoint (downloading it from the
-    Hugging Face Hub or Google Drive automatically if not yet present).
+    it as None to use the variant's weights bundled with the package.  With
+    ``download=True`` the weights are fetched from the Hugging Face Hub
+    (falling back to Google Drive) instead.
 
     Checkpoints are always loaded with ``weights_only=True``.
     """
@@ -123,7 +156,7 @@ def load_checkpoint(
                 f"Unknown variant {variant!r}. Choose from: {list(VARIANTS)}"
             )
         fallback_config = VARIANTS[variant]
-        ckpt_path = _get_local_checkpoint(fallback_config)
+        ckpt_path = _get_local_checkpoint(fallback_config, download=download)
         if ckpt_path is None:
             raise RuntimeError(
                 f"No checkpoint found for variant {variant!r} and no download source configured."

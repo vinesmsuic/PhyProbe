@@ -5,7 +5,6 @@ Score a single video for physical consistency violations.
 Usage:
     python score_video.py video.mp4
     python score_video.py --clip-sec 3.0 video.mp4
-    python score_video.py --variant pespatial_paper video.mp4
     python score_video.py --checkpoint path/to/model.pt video.mp4
 """
 
