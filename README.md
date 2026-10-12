@@ -2,7 +2,9 @@
 
 Physical consistency violation scorer for AI-generated videos.
 
-[Project page](https://research.nvidia.com/labs/cosmos-lab/phyprobe/) · [Paper](https://arxiv.org/abs/2609.38377)
+[Project page](https://research.nvidia.com/labs/cosmos-lab/phyprobe/) · [Paper](https://arxiv.org/abs/2609.38377) · [Video](https://youtu.be/EjP1-Sd9nlw)
+
+[![PhyProbe video](https://img.youtube.com/vi/EjP1-Sd9nlw/maxresdefault.jpg)](https://youtu.be/EjP1-Sd9nlw)
 
 Higher score → more severe physical consistency violations.
 
