@@ -161,6 +161,8 @@ The notebook installs the only external dependency (`perception_models`), downlo
 
 If you use PhyProbe in your research, please cite:
 
+NeurIPS 2026:
+
 ```bibtex
 @inproceedings{ku2026phyprobe,
   title   = {PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos},
@@ -171,7 +173,11 @@ If you use PhyProbe in your research, please cite:
   archivePrefix = {arXiv},
   url     = {https://arxiv.org/abs/2609.38377}
 }
+```
 
+arXiv:
+
+```bibtex
 @misc{ku2026phyproberethinkingphysicalconsistency,
       title={PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos}, 
       author={Max Ku and Jiaojiao Fan and Zekun Hao and Francesco Ferroni and Heng Wang and Wenhu Chen and Ming-Yu Liu and Prithvijit Chattopadhyay},
