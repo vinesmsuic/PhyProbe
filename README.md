@@ -1,10 +1,17 @@
-# PhyProbe
+# PhyProbe: Physical Consistency Violation Scorer
 
-Physical consistency violation scorer for AI-generated videos.
+### [[Project Page]](https://research.nvidia.com/labs/cosmos-lab/phyprobe/) [[Paper]](https://arxiv.org/abs/2609.38377) [[Video]](https://youtu.be/EjP1-Sd9nlw) [[Model]](https://huggingface.co/vinesmsuic/PhyProbe)
 
-[Project page](https://research.nvidia.com/labs/cosmos-lab/phyprobe/) · [Paper](https://arxiv.org/abs/2609.38377) · [Video](https://youtu.be/EjP1-Sd9nlw)
+**PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos**  
+[Max Ku](https://kuwingfung.github.io/), Jiaojiao Fan, Zekun Hao, Francesco Ferroni, Heng Wang, [Wenhu Chen](https://wenhuchen.github.io/), [Ming-Yu Liu](https://mingyuliu.net/), [Prithvijit Chattopadhyay](https://prithv1.xyz/)  
+In NeurIPS 2026.
 
-[![PhyProbe video](https://img.youtube.com/vi/EjP1-Sd9nlw/maxresdefault.jpg)](https://youtu.be/EjP1-Sd9nlw)
+<a href="https://youtu.be/EjP1-Sd9nlw"><img src="https://raw.githubusercontent.com/vinesmsuic/PhyProbe/main/assets/phyprobe_demo.gif" alt="PhyProbe demo" width="100%"></a>
+
+PhyProbe scores how severely a generated video violates physical consistency.
+It extracts features with a frozen spatiotemporal encoder (PE-Core-G14-448) and
+maps them to a single score with a lightweight (~1M-parameter) head. It needs
+only the video — no prompt or reference.
 
 Higher score → more severe physical consistency violations.
 
@@ -152,13 +159,13 @@ The notebook installs the only external dependency (`perception_models`), downlo
 If you use PhyProbe in your research, please cite:
 
 ```bibtex
-@misc{ku2026phyproberethinkingphysicalconsistency,
-      title={PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos}, 
-      author={Max Ku and Jiaojiao Fan and Zekun Hao and Francesco Ferroni and Heng Wang and Wenhu Chen and Ming-Yu Liu and Prithvijit Chattopadhyay},
-      year={2026},
-      eprint={2609.38377},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2609.38377}, 
+@inproceedings{ku2026phyprobe,
+  title   = {PhyProbe: Rethinking Physical Consistency Evaluation in Generated Videos},
+  author  = {Ku, Max and Fan, Jiaojiao and Hao, Zekun and Ferroni, Francesco and Wang, Heng and Chen, Wenhu and Liu, Ming-Yu and Chattopadhyay, Prithvijit},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year    = {2026},
+  eprint  = {2609.38377},
+  archivePrefix = {arXiv},
+  url     = {https://arxiv.org/abs/2609.38377}
 }
 ```

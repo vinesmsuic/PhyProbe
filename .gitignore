@@ -47,3 +47,6 @@ flagged/
 # Secrets
 .env
 .env.*
+
+# Local scratch media
+_temp_assets/
