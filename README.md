@@ -7,6 +7,7 @@
 In [NeurIPS 2026](https://neurips.cc/Conferences/2026).
 
 <a href="https://youtu.be/EjP1-Sd9nlw"><img src="https://github.com/vinesmsuic/PhyProbe/blob/main/assets/phyprobe_demo.gif?raw=true" alt="PhyProbe demo" width="100%"></a>
+(^Click on the gif for the full video)
 
 PhyProbe scores how severely a generated video violates physical consistency.
 It extracts features with a frozen spatiotemporal encoder (PE-Core-G14-448) and
